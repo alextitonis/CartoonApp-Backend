@@ -16,7 +16,7 @@ export default async function generateStory(
   prompt += "</INFORMATION>\n";
   prompt += "<FORMAT>\n";
   prompt +=
-    "Must return 2-4 panels, with information on the panel and a line of the person speaking\n";
+    "Must return 1-2 panels, with information on the panel and a line of the person speaking\n";
   prompt += "Example:\n";
   prompt += "Panel {number}:\n";
   prompt += "Dialogue: {dialogue}\n";
@@ -58,12 +58,15 @@ export default async function generateStory(
   }
 
   console.log("Total panels:", panels.length);
-  for (let i = 0; i < panels.length; i++) {
-    const description = panels[i].description;
+  const promises = panels.map(async (panel) => {
+    const description = panel.description;
     console.log("Generating image for:", description);
     const img = await textToImage(description);
-    panels[i].img = img;
-  }
+    panel.img = img;
+    return img;
+  });
+
+  await Promise.all(promises);
   return panels;
 }
 
