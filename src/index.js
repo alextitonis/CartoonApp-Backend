@@ -4,7 +4,13 @@ import generateStory from "./story_generator.js";
 
 const port = process.env.PORT || 3000;
 const app = express();
-app.use(cors());
+const corsOptions = {
+  origin: "*",
+  methods: "GET,POST,OPTIONS",
+  allowedHeaders: "Content-Type,Authorization",
+};
+app.use(cors(corsOptions));
+app.use(express.json());
 app.use(express.json());
 
 app.post("/generate", async (req, res) => {
