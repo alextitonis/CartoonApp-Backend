@@ -57,8 +57,8 @@ export default async function generateStory(
     panels.push(panel);
   }
 
-  if (panels.length >= 3) {
-    panels.splice(3);
+  if (panels.length >= 2) {
+    panels.splice(2);
   }
 
   console.log("Total panels:", panels.length);
