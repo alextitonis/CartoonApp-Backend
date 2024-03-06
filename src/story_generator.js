@@ -57,6 +57,10 @@ export default async function generateStory(
     panels.push(panel);
   }
 
+  if (panels.length >= 3) {
+    panels.splice(3);
+  }
+
   console.log("Total panels:", panels.length);
   const promises = panels.map(async (panel) => {
     const description = panel.description;
