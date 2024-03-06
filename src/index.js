@@ -18,6 +18,6 @@ app.post("/generate", async (req, res) => {
   res.json(resp);
 });
 
-app.listen(post, () => {
+app.listen(port, () => {
   console.log("Server is running on port 3000");
 });
