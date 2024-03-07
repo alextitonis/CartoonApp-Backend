@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import timeout from "connect-timeout";
 import generateStory from "./story_generator.js";
 
 const port = process.env.PORT || 3000;
@@ -12,6 +13,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.json());
+app.use(timeout("1200000000"));
 
 app.post("/generate", async (req, res) => {
   const { prompt, character, genre, style, tone, themes } = req.body;
