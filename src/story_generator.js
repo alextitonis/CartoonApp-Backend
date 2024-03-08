@@ -1,6 +1,8 @@
 import { getHf, textToImage } from "./hf.js";
 import * as fs from "fs";
+import tts from "./tts.js";
 
+const voiceId = "21m00Tcm4TlvDq8ikWAM";
 export default async function generateStory(
   story_tag_line,
   character,
@@ -61,14 +63,29 @@ export default async function generateStory(
     panels.splice(3);
   }
 
+  const promises = [];
   console.log("Total panels:", panels.length);
   for (let i = 0; i < panels.length; i++) {
     const description = panels[i].description;
     console.log("Generating image for:", description);
-    const img = await textToImage(description);
-    panels[i].img = img;
+    promises.push(
+      textToImage(description).then((img) => {
+        console.log("Image generated!");
+        panels[i].img = img;
+      })
+    );
+    promises.push(
+      tts(voiceId, panels[i].dialogue).then((audio) => {
+        console.log("Audio generated!");
+        panels[i].audio = audio;
+      })
+    );
   }
+
+  await Promise.all(promises);
   console.log("Story generated!");
+
+  fs.writeFileSync("story.json", JSON.stringify(panels));
   return panels;
 }
 
