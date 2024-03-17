@@ -24,31 +24,11 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: "50mb" }));
 app.use(timeout("1200000000"));
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./uploads");
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = uuidv4();
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  },
-});
-
-const upload = multer({ storage: storage });
-
-app.use("/images", express.static("uploads"));
-
 app.post("/generate", async (req, res) => {
   const { prompt, character, characterImage, genre, style, tone, themes } =
     req.body;
-  const filename = uuidv4() + ".png";
-  const base64Data = characterImage.replace(/^data:image\/png;base64,/, "");
-  fs.writeFileSync(`uploads/${filename}`, base64Data, "base64");
-  const imageUrl = `${req.protocol}://${req.get("host")}/images/${filename}`;
 
-  console.log("Prompt:", imageUrl);
-
-  const resp = await generateStory(prompt, character, imageUrl, {
+  const resp = await generateStory(prompt, character, characterImage, {
     genre,
     style,
     tone,

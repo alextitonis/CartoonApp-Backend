@@ -13,22 +13,27 @@ export const getHf = () => {
 };
 
 export async function textToImage(prompt, characterImage) {
-  const output = await replicate.run(
-    "lucataco/ip-adapter-faceid:fb81ef963e74776af72e6f380949013533d46dd5c6228a9e586c57db6303d7cd",
-    {
-      input: {
-        seed: 2212213399,
-        width: 1024,
-        height: 1024,
-        prompt,
-        face_image: characterImage,
-        num_outputs: 1,
-        negative_prompt:
-          "monochrome, lowres, bad anatomy, worst quality, low quality, blurry, multiple people",
-        num_inference_steps: 30,
-        agree_to_research_only: true,
-      },
-    }
-  );
-  return output[0];
+  try {
+    const output = await replicate.run(
+      "lucataco/ip-adapter-faceid:fb81ef963e74776af72e6f380949013533d46dd5c6228a9e586c57db6303d7cd",
+      {
+        input: {
+          seed: 2212213399,
+          width: 1024,
+          height: 1024,
+          prompt,
+          face_image: characterImage,
+          num_outputs: 1,
+          negative_prompt:
+            "monochrome, lowres, bad anatomy, worst quality, low quality, blurry, multiple people",
+          num_inference_steps: 30,
+          agree_to_research_only: true,
+        },
+      }
+    );
+    return output[0];
+  } catch (e) {
+    console.log(e);
+    return characterImage;
+  }
 }
