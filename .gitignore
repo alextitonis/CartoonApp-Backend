@@ -130,3 +130,5 @@ dist
 .pnp.*
 
 gcloud.json
+uploads/*
+temp/*
