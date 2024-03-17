@@ -12,7 +12,7 @@ export const getHf = () => {
   return hf;
 };
 
-export async function textToImage(prompt) {
+export async function textToImage(prompt, characterImage) {
   const output = await replicate.run(
     "lucataco/ip-adapter-faceid:fb81ef963e74776af72e6f380949013533d46dd5c6228a9e586c57db6303d7cd",
     {
@@ -21,8 +21,7 @@ export async function textToImage(prompt) {
         width: 1024,
         height: 1024,
         prompt,
-        face_image:
-          "https://replicate.delivery/pbxt/K5DSwf3aUzIpS4srbRhNQkESybPovfXwEfjIuDMj3Dz86tDV/demo.png",
+        face_image: characterImage,
         num_outputs: 1,
         negative_prompt:
           "monochrome, lowres, bad anatomy, worst quality, low quality, blurry, multiple people",

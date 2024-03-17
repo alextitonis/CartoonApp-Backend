@@ -6,6 +6,7 @@ const voiceId = "21m00Tcm4TlvDq8ikWAM";
 export default async function generateStory(
   story_tag_line,
   character,
+  characterImage,
   story_settings = { genre, style, tone, themes: [] }
 ) {
   let prompt = "<INFORMATION>\n";
@@ -59,8 +60,8 @@ export default async function generateStory(
     panels.push(panel);
   }
 
-  if (panels.length >= 4) {
-    panels.splice(4);
+  if (panels.length >= 1) {
+    panels.splice(1);
   }
 
   const promises = [];
@@ -69,7 +70,7 @@ export default async function generateStory(
     const description = panels[i].description;
     console.log("Generating image for:", description);
     promises.push(
-      textToImage(description).then((img) => {
+      textToImage(description, characterImage).then((img) => {
         console.log("Image generated!");
         panels[i].img = img;
       })
