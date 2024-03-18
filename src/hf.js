@@ -1,6 +1,7 @@
 import { HfInference } from "@huggingface/inference";
 import dotenv from "dotenv";
 import Replicate from "replicate";
+import * as fs from "fs";
 dotenv.config();
 const key = process.env.HF_API_KEY;
 const hf = new HfInference(key);
@@ -14,24 +15,30 @@ export const getHf = () => {
 
 export async function textToImage(prompt, characterImage) {
   try {
-    const output = await replicate.run(
-      "lucataco/ip-adapter-faceid:fb81ef963e74776af72e6f380949013533d46dd5c6228a9e586c57db6303d7cd",
-      {
-        input: {
-          seed: 2212213399,
-          width: 1024,
-          height: 1024,
-          prompt,
-          face_image: characterImage,
-          num_outputs: 1,
-          negative_prompt:
-            "monochrome, lowres, bad anatomy, worst quality, low quality, blurry, multiple people",
-          num_inference_steps: 30,
-          agree_to_research_only: true,
-        },
-      }
+    prompt += "cold color palette, muted colors, detailed, 8k";
+    characterImage = characterImage.replace(
+      /^data:image\/(png|jpeg|jpg);base64,/,
+      ""
     );
-    return output[0];
+    const imageBlob = new Blob([Buffer.from(characterImage, "base64")], {
+      type: "image/png",
+    });
+    console.log("Generating image for:", imageBlob);
+    const resp = await hf.imageToImage({
+      inputs: imageBlob,
+      parameters: {
+        prompt,
+      },
+      model: "lllyasviel/sd-controlnet-depth",
+    });
+    console.log("Image generated!", resp);
+    const buffer = await resp.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString("base64");
+    if (!base64.startsWith("data:image/")) {
+      return `data:image/png;base64,${base64}`;
+    }
+    return base64;
+    //save file, resp is a blob
   } catch (e) {
     console.log(e);
     return characterImage;
