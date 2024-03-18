@@ -60,8 +60,8 @@ export default async function generateStory(
     panels.push(panel);
   }
 
-  if (panels.length >= 4) {
-    panels.splice(4);
+  if (panels.length >= 2) {
+    panels.splice(2);
   }
 
   const promises = [];
