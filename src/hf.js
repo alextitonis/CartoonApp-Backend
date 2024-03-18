@@ -15,7 +15,7 @@ export const getHf = () => {
 
 export async function textToImage(prompt, characterImage) {
   try {
-    prompt += "cold color palette, muted colors, detailed, 8k";
+    prompt += " cold color palette, muted colors, detailed, 8k";
     characterImage = characterImage.replace(
       /^data:image\/(png|jpeg|jpg);base64,/,
       ""
@@ -24,13 +24,14 @@ export async function textToImage(prompt, characterImage) {
       type: "image/png",
     });
     console.log("Generating image for:", imageBlob);
-    const resp = await hf.imageToImage({
-      inputs: imageBlob,
+    const resp = await hf.textToImage({
+      model: "stabilityai/stable-diffusion-2",
+      inputs: prompt,
       parameters: {
-        prompt,
+        negative_prompt: "blurry",
       },
-      model: "lllyasviel/sd-controlnet-depth",
     });
+
     console.log("Image generated!", resp);
     const buffer = await resp.arrayBuffer();
     const base64 = Buffer.from(buffer).toString("base64");
@@ -41,6 +42,9 @@ export async function textToImage(prompt, characterImage) {
     //save file, resp is a blob
   } catch (e) {
     console.log(e);
+    if (!characterImage.startsWith("data:image/")) {
+      return `data:image/png;base64,${characterImage}`;
+    }
     return characterImage;
   }
 }
