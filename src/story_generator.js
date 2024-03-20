@@ -1,4 +1,4 @@
-import { getHf, textToImage } from "./hf.js";
+import { getHf, textToImage, imageToImage } from "./hf.js";
 import * as fs from "fs";
 import tts from "./tts.js";
 
@@ -70,7 +70,7 @@ export default async function generateStory(
     const description = panels[i].description;
     console.log("Generating image for:", description);
     promises.push(
-      textToImage(description, characterImage).then((img) => {
+      imageToImage(description, characterImage).then((img) => {
         console.log("Image generated!");
         panels[i].img = img;
       })

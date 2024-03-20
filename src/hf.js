@@ -1,13 +1,10 @@
 import { HfInference } from "@huggingface/inference";
 import dotenv from "dotenv";
-import Replicate from "replicate";
-import * as fs from "fs";
+import axios from "axios";
+
 dotenv.config();
 const key = process.env.HF_API_KEY;
 const hf = new HfInference(key);
-const replicate = new Replicate({
-  auth: process.env.REPLICATE_API_TOKEN,
-});
 
 export const getHf = () => {
   return hf;
@@ -40,6 +37,50 @@ export async function textToImage(prompt, characterImage) {
     }
     return base64;
     //save file, resp is a blob
+  } catch (e) {
+    console.log(e);
+    if (!characterImage.startsWith("data:image/")) {
+      return `data:image/png;base64,${characterImage}`;
+    }
+    return characterImage;
+  }
+}
+
+export async function imageToImage(
+  prompt,
+  characterImage,
+  negative_prompt = "nsfw, low-res",
+  width = 680,
+  height = 680,
+  num_inference_steps = 10,
+  guidance_scale = 5
+) {
+  try {
+    const url = `http://fairytale.xenon.fun:5000/predictions`;
+    if (!characterImage.startsWith("data:image/")) {
+      characterImage = `data:image/png;base64,${characterImage}`;
+    }
+    const body = {
+      input: {
+        image: characterImage,
+        prompt,
+        negative_prompt,
+        width,
+        height,
+        num_inference_steps,
+        guidance_scale,
+      },
+    };
+    const resp = await axios.post(url, body, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const img = resp.data.output;
+    if (!img.startsWith("data:image/")) {
+      return `data:image/png;base64,${img}`;
+    }
+    return img;
   } catch (e) {
     console.log(e);
     if (!characterImage.startsWith("data:image/")) {
