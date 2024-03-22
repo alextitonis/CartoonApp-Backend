@@ -3,6 +3,7 @@ import * as fs from "fs";
 import tts from "./tts.js";
 
 const voiceId = "21m00Tcm4TlvDq8ikWAM";
+
 export default async function generateStory(
   story_tag_line,
   character,
@@ -24,16 +25,14 @@ export default async function generateStory(
   prompt += "Panel {number}:\n";
   prompt += "Dialogue: {dialogue}\n";
   prompt += "Description: {description}\n";
+  prompt += "ImageType: {imageType}\n";
   prompt +=
     "Dialogue is a line that the character is saying in the panel and description is the description of the scene and character\n";
   prompt += "Both dialogue and description should be short!\n";
+  prompt += "Image type can either be character or environment!\n";
   prompt += "<FORMAT>\n";
   prompt +=
     "[INST]Write a story with the information above, make it interesting and engaging. The story should atleast 3 panels, up to 5 panels. [/INST]";
-
-  while (prompt.includes("{{username}}")) {
-    prompt = prompt.replace("{{username}}", user.name);
-  }
 
   const hf = getHf();
   const hfResponse = await hf.textGeneration({
@@ -48,7 +47,8 @@ export default async function generateStory(
 
   const resp = hfResponse.generated_text;
   const panels = [];
-  const panelPattern = /Panel (\d+):\s+Dialogue: "(.+)"\s+Description: (.+)/g;
+  const panelPattern =
+    /Panel (\d+):\s+Dialogue: "(.+)"\s+Description: (.+)\s+Image Type: (.+)/g;
 
   let match;
   while ((match = panelPattern.exec(resp)) !== null) {
@@ -56,6 +56,7 @@ export default async function generateStory(
       index: parseInt(match[1]),
       dialogue: match[2],
       description: match[3],
+      imageType: match[4], // Extract ImageType
     };
     panels.push(panel);
   }
@@ -69,18 +70,28 @@ export default async function generateStory(
   for (let i = 0; i < panels.length; i++) {
     const description = panels[i].description;
     console.log("Generating image for:", description);
-    promises.push(
-      imageToImage(description, characterImage).then((img) => {
-        console.log("Image generated!");
-        panels[i].img = img;
-      })
-    );
-    promises.push(
+    const imageType = panels[i].imageType.toLowerCase().trim();
+    if (imageType == "environment") {
+      promises.push(
+        textToImage(description).then((img) => {
+          console.log("Image generated!");
+          panels[i].img = img;
+        })
+      );
+    } else {
+      promises.push(
+        imageToImage(description, characterImage).then((img) => {
+          console.log("Image generated!");
+          panels[i].img = img;
+        })
+      );
+    }
+    /*promises.push(
       tts(voiceId, panels[i].dialogue).then((audio) => {
         console.log("Audio generated!");
         panels[i].audio = audio;
       })
-    );
+    );*/
   }
 
   await Promise.all(promises);
@@ -90,9 +101,15 @@ export default async function generateStory(
   return panels;
 }
 
-/*const resp = await generateStory(
+/*let b64 = fs.readFileSync("test.jpeg", "base64");
+if (!b64.startsWith("data:image/")) {
+  b64 = `data:image/png;base64,${b64}`;
+}
+
+const resp = await generateStory(
   "An astronaut is stranded on a distant planet.",
   "John",
+  b64,
   {
     genre: "Science Fiction",
     style: "Hard Sci-Fi",
@@ -100,6 +117,7 @@ export default async function generateStory(
     themes: ["Survival", "Isolation"],
   }
 );
+
 for (let i = 0; i < resp.length; i++) {
   //img is base64 save it as file
   const img = resp[i].img;
