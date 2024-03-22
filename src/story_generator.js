@@ -86,12 +86,12 @@ export default async function generateStory(
         })
       );
     }
-    /*promises.push(
+    promises.push(
       tts(voiceId, panels[i].dialogue).then((audio) => {
         console.log("Audio generated!");
         panels[i].audio = audio;
       })
-    );*/
+    );
   }
 
   await Promise.all(promises);
